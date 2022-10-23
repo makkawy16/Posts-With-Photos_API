@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.photospostsusingapi.R;
+import com.example.photospostsusingapi.Ui.Adapter.PhotosAdapter;
 import com.example.photospostsusingapi.data.Model.PhotoResponseItem;
 import com.example.photospostsusingapi.data.Source.Remote.RetrofitClient;
 import com.example.photospostsusingapi.databinding.FragmentPostsBinding;
@@ -27,7 +29,8 @@ import retrofit2.Response;
 public class PostsFragment extends Fragment {
 
     FragmentPostsBinding binding;
-    ProgressDialog mloadingBar ;
+    ProgressDialog mloadingBar;
+    PhotosAdapter photosAdapter;
 
 
     public PostsFragment() {
@@ -52,8 +55,14 @@ public class PostsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentPostsBinding.bind(view);
-
+        initRecycler();
         fetchPosts();
+    }
+
+    private void initRecycler() {
+        photosAdapter = new PhotosAdapter();
+        binding.postsRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.postsRecycler.setAdapter(photosAdapter);
     }
 
     private void fetchPosts() {
@@ -64,6 +73,8 @@ public class PostsFragment extends Fragment {
             public void onResponse(Call<List<PhotoResponseItem>> call, Response<List<PhotoResponseItem>> response) {
                 Log.d("dddddd", "onResponse: " + response.body());
                 mloadingBar.dismiss();
+                photosAdapter.addPhotos(response.body());
+
             }
 
             @Override
@@ -85,11 +96,9 @@ public class PostsFragment extends Fragment {
     }
 
 
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding=null;
+        binding = null;
     }
 }
